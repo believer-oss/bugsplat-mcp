@@ -1,0 +1,32 @@
+{
+  "name": "bugsplat-mcp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "bugsplat-mcp": "./build/index.js"
+  },
+  "scripts": {
+    "prebuild": "rm -rf build",
+    "build": "tsc && chmod 755 build/index.js",
+    "prestart": "npm run build",
+    "start": "node scripts/start.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@bugsplat/js-api-client": "^11.0.0",
+    "@modelcontextprotocol/sdk": "^1.9.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "dotenv": "^16.4.7",
+    "typescript": "^5.8.3"
+  },
+  "files": [
+    "build"
+  ]
+}
