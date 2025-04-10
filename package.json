@@ -9,8 +9,10 @@
   "scripts": {
     "prebuild": "rm -rf build",
     "build": "tsc && chmod 755 build/index.js",
+    "predebug": "npm run build",
+    "debug": "node scripts/debug.mjs",
     "prestart": "npm run build",
-    "start": "node scripts/start.mjs"
+    "start": "node build/index.js"
   },
   "keywords": [],
   "author": "",
@@ -28,5 +30,6 @@
   },
   "files": [
     "build"
-  ]
+  ],
+  "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
 }
