@@ -71,8 +71,15 @@ server.tool(
       .string()
       .optional()
       .describe("End date for filtering (ISO format)"),
+    pageSize: z
+      .number()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(50)
+      .describe("Number of results per page (1-100, defaults to 10)"),
   },
-  async ({ application, version, startDate, endDate }) => {
+  async ({ application, version, startDate, endDate, pageSize }) => {
     const credentialsError = checkCredentials();
     if (credentialsError) return credentialsError;
 
@@ -105,7 +112,7 @@ server.tool(
     const crashes = await crashesClient.getCrashes({
       database: process.env.BUGSPLAT_DATABASE!,
       filterGroups,
-      pageSize: 5,
+      pageSize,
     });
 
     const output = formatIssuesOutput(crashes.rows);
@@ -168,8 +175,15 @@ server.tool(
       .string()
       .optional()
       .describe("End date for filtering (ISO format)"),
+    pageSize: z
+      .number()
+      .min(1)
+      .max(20)
+      .optional()
+      .default(10)
+      .describe("Number of results per page (1-20, defaults to 10)"),
   },
-  async ({ application, version, startDate, endDate }) => {
+  async ({ application, version, startDate, endDate, pageSize }) => {
     const credentialsError = checkCredentials();
     if (credentialsError) return credentialsError;
 
@@ -208,6 +222,7 @@ server.tool(
     const response = await summaryClient.getSummary({
       database: process.env.BUGSPLAT_DATABASE!,
       filterGroups,
+      pageSize,
     });
 
     const output = formatSummaryOutput(response.rows);

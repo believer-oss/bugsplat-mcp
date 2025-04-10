@@ -4,15 +4,15 @@
   "description": "",
   "main": "index.js",
   "bin": {
-    "bugsplat-mcp": "./build/index.js"
+    "bugsplat-mcp": "./build/index.mjs"
   },
   "scripts": {
     "prebuild": "rm -rf build",
-    "build": "tsc && chmod 755 build/index.js",
+    "build": "tsc && mv build/index.js build/index.mjs && chmod 755 build/index.mjs",
     "predebug": "npm run build",
     "debug": "node scripts/debug.mjs",
     "prestart": "npm run build",
-    "start": "node build/index.js"
+    "start": "node build/index.mjs"
   },
   "keywords": [],
   "author": "",
