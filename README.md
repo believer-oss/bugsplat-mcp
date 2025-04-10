@@ -9,7 +9,7 @@ This is a prototype implementation of a Model Context Protocol (MCP) server for 
 npm install
 ```
 
-2. Add a local MCP server to Claude via `Settings > Developer > Edit Config`. Add the path to `node` under `command` and the path to `bugsplat-mcp/build/index.mjs` under `args`. Finally add env values for `BUGSPLAT_DATABASE`, `BUGSPLAT_CLIENT_ID`, and `BUGSPLAT_CLIENT_SECRET`.
+2. Add a local MCP server to [Claude Desktop](https://claude.ai/download) via `Settings > Developer > Edit Config`. Add the path to `node` under `command` and the path to `bugsplat-mcp/build/index.mjs` under `args`. Finally add env values for `BUGSPLAT_DATABASE`, `BUGSPLAT_CLIENT_ID`, and `BUGSPLAT_CLIENT_SECRET`.
 ```json
 {
   "mcpServers": {
