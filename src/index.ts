@@ -1,8 +1,12 @@
 import {
+  CrashApiClient,
+  CrashDetails,
   CrashesApiClient,
   CrashesApiRow,
   OAuthClientCredentialsClient,
   QueryFilterGroup,
+  SummaryApiClient,
+  SummaryApiRow,
 } from "@bugsplat/js-api-client";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -52,7 +56,7 @@ async function createBugSplatClient() {
 // Register BugSplat tools
 server.tool(
   "get-issues",
-  "Get BugSplat issues with optional filtering",
+  "Get BugSplat issues with optional filtering. The issues tool lists the all crashes in the BugSplat database and is useful for determining the most recent crashes.",
   {
     application: z
       .string()
@@ -119,20 +123,28 @@ server.tool(
 
 server.tool(
   "get-issue",
-  "Get details of a specific BugSplat issue",
+  "Get details of a specific BugSplat issue. The issue tool lists the details of a specific crash and is useful for determining the cause of and fixing a specific crash.",
   {
-    id: z.string().describe("Issue ID to retrieve"),
+    id: z.number().describe("Issue ID to retrieve"),
   },
   async ({ id }) => {
     const credentialsError = checkCredentials();
     if (credentialsError) return credentialsError;
 
-    // TODO: Implement BugSplat API integration
+    const bugsplat = await createBugSplatClient();
+    const crashClient = new CrashApiClient(bugsplat);
+    const crash = await crashClient.getCrashById(
+      process.env.BUGSPLAT_DATABASE!,
+      id
+    );
+
+    const output = formatIssueOutput(crash);
+
     return {
       content: [
         {
           type: "text" as const,
-          text: "Get issue details functionality to be implemented",
+          text: output,
         },
       ],
     };
@@ -141,7 +153,7 @@ server.tool(
 
 server.tool(
   "get-summary",
-  "Get summary of BugSplat issues with optional filtering",
+  "Get summary of BugSplat issues with optional filtering. The summary tool lists information about groups of crashes and is useful for determining what issues are most prevalent.",
   {
     application: z
       .string()
@@ -161,17 +173,107 @@ server.tool(
     const credentialsError = checkCredentials();
     if (credentialsError) return credentialsError;
 
-    // TODO: Implement BugSplat API integration
+    const bugsplat = await createBugSplatClient();
+    const summaryClient = new SummaryApiClient(bugsplat);
+    let filterGroups: QueryFilterGroup[] = [];
+
+    if (application) {
+      filterGroups.push(
+        QueryFilterGroup.fromColumnValues([application], "application")
+      );
+    }
+
+    if (version) {
+      filterGroups.push(
+        QueryFilterGroup.fromColumnValues([version], "version")
+      );
+    }
+
+    if (startDate) {
+      // filterGroups
+      //   .push
+      // TODO BG GREATER_THAN
+      // QueryFilterGroup.fromColumnValues([new Date(startDate).toISOString()], "firstReport")
+      // ();
+    }
+
+    if (endDate) {
+      // filterGroups
+      //   .push
+      // TODO BG LESS_THAN
+      // QueryFilterGroup.fromColumnValues([new Date(endDate).toISOString()], "firstReport")
+      // ();
+    }
+
+    const response = await summaryClient.getSummary({
+      database: process.env.BUGSPLAT_DATABASE!,
+      filterGroups,
+    });
+
+    const output = formatSummaryOutput(response.rows);
+
     return {
       content: [
         {
           type: "text" as const,
-          text: "Get summary functionality to be implemented",
+          text: output,
         },
       ],
     };
   }
 );
+
+function formatIssueOutput(crash: CrashDetails) {
+  let text = `Crash #${crash.id} in database ${process.env.BUGSPLAT_DATABASE} on ${crash.crashTime}\n`;
+  if (crash.appName) {
+    text += `Application: ${crash.appName}\n`;
+  }
+  if (crash.appVersion) {
+    text += `Version: ${crash.appVersion}\n`;
+  }
+  if (crash.appKey) {
+    text += `Key: ${crash.appKey}\n`;
+  }
+  if (crash.user) {
+    text += `User: ${crash.user}\n`;
+  }
+  if (crash.email) {
+    text += `Email: ${crash.email}\n`;
+  }
+  if (crash.exceptionCode) {
+    text += `Exception Code: ${crash.exceptionCode}\n`;
+  }
+  if (crash.exceptionMessage) {
+    text += `Exception Message: ${crash.exceptionMessage}\n`;
+  }
+  if (crash.ipAddress) {
+    text += `IP Address: ${crash.ipAddress}\n`;
+  }
+  if (crash.description) {
+    text += `User Description: ${crash.description}\n`;
+  }
+  if (crash.comments) {
+    text += `Comments: ${crash.comments}\n`;
+  }
+  if (crash.stackKeyComment) {
+    text += `Stack Group Comment: ${crash.stackKeyComment}\n`;
+  }
+  if (crash.thread) {
+    text += `Stack Trace:\n${crash.thread.stackFrames
+      .map((frame) => {
+        let stackFrame = frame.functionName;
+        if (frame.lineNumber) {
+          stackFrame += `:${frame.lineNumber}`;
+        }
+        if (frame.fileName) {
+          stackFrame += ` (${frame.fileName})`;
+        }
+        return `${stackFrame}`;
+      })
+      .join("\n")}`;
+  }
+  return text;
+}
 
 function formatIssuesOutput(rows: CrashesApiRow[]) {
   return rows
@@ -201,6 +303,14 @@ function formatIssuesOutput(rows: CrashesApiRow[]) {
       return text;
     })
     .join("");
+}
+
+function formatSummaryOutput(rows: SummaryApiRow[]) {
+  return rows
+    .map((row, i) => {
+      return `Summary for ${row.stackKey} from ${row.firstReport} to ${row.lastReport} ${row.crashSum} crashes`;
+    })
+    .join("\n");
 }
 
 async function main() {
