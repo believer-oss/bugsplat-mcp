@@ -1,4 +1,5 @@
 import {
+  QueryFilter,
   QueryFilterGroup,
   SummaryApiClient,
   SummaryApiRow,
@@ -8,8 +9,8 @@ import { createBugSplatClient } from "./bugsplat.js";
 export async function getSummary(
   database: string,
   options: {
-    application?: string;
-    version?: string;
+    applications?: string[];
+    versions?: string[];
     startDate?: string;
     endDate?: string;
     pageSize?: number;
@@ -19,36 +20,29 @@ export async function getSummary(
   const summaryClient = new SummaryApiClient(bugsplat);
   let filterGroups: QueryFilterGroup[] = [];
 
-  if (options.application) {
-    filterGroups.push(
-      QueryFilterGroup.fromColumnValues([options.application], "application")
-    );
-  }
-
-  if (options.version) {
-    filterGroups.push(
-      QueryFilterGroup.fromColumnValues([options.version], "version")
-    );
-  }
-
   if (options.startDate) {
-    // TODO BG GREATER_THAN
-    // filterGroups.push(
-    //   QueryFilterGroup.fromColumnValues([new Date(options.startDate).toISOString()], "firstReport")
-    // );
+    filterGroups.push(
+      new QueryFilterGroup([
+        new QueryFilter(options.startDate, "GREATER_THAN", "firstReport"),
+      ])
+    );
   }
 
   if (options.endDate) {
-    // TODO BG LESS_THAN
-    // filterGroups.push(
-    //   QueryFilterGroup.fromColumnValues([new Date(options.endDate).toISOString()], "firstReport")
-    // );
+    filterGroups.push(
+      QueryFilterGroup.fromColumnValues(
+        [new Date(options.endDate).toISOString()],
+        "firstReport"
+      )
+    );
   }
 
   const response = await summaryClient.getSummary({
     database,
+    applications: options.applications,
+    versions: options.versions,
+    pageSize: options.pageSize,
     filterGroups,
-    pageSize: options.pageSize
   });
 
   return response.rows;

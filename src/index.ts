@@ -81,11 +81,14 @@ server.tool(
   "get-summary",
   "Get summary of BugSplat issues with optional filtering. The summary tool lists information about groups of crashes and is useful for determining what issues are most prevalent.",
   {
-    application: z
-      .string()
+    applications: z
+      .array(z.string())
       .optional()
-      .describe("Application name to filter by"),
-    version: z.string().optional().describe("Version to filter by"),
+      .describe("Application names to filter by"),
+    versions: z
+      .array(z.string())
+      .optional()
+      .describe("Versions to filter by"),
     startDate: z
       .string()
       .optional()
@@ -102,12 +105,12 @@ server.tool(
       .default(10)
       .describe("Number of results per page (1-20, defaults to 10)"),
   },
-  async ({ application, version, startDate, endDate, pageSize }) => {
+  async ({ applications, versions, startDate, endDate, pageSize }) => {
     try {
       checkCredentials();
       const rows = await getSummary(process.env.BUGSPLAT_DATABASE!, {
-        application,
-        version,
+        applications,
+        versions,
         startDate,
         endDate,
         pageSize,

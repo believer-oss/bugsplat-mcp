@@ -49,11 +49,11 @@ Get detailed information about a specific issue:
 
 ### get-summary
 Get a summary of BugSplat issues with optional filtering:
-- `application`: Filter by application name
-- `version`: Filter by version
+- `applications`: Array of application names to filter by
+- `versions`: Array of versions to filter by
 - `startDate`: Filter by start date (ISO format)
 - `endDate`: Filter by end date (ISO format)
-- `pageSize`: Number of results per page (1-99, defaults to 20)
+- `pageSize`: Number of results per page (1-20, defaults to 10)
 
 Each tool will automatically use the credentials provided in your `.env` file. 
 

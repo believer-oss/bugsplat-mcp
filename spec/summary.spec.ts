@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 import { formatSummaryOutput, getSummary } from "../src/summary.js";
 import { postAndWaitForCrashToProcess } from "./crash.js";
+import { SummaryApiRow } from "@bugsplat/js-api-client";
 
 // Load environment variables from .env file
 config();
@@ -27,8 +28,8 @@ describe("summary integration", () => {
     it("should fetch summary from BugSplat", async () => {
       const result = await getSummary(database, {
         pageSize: 5,
-        application,
-        version,
+        applications: [application],
+        versions: [version],
       });
 
       expect(Array.isArray(result)).toBe(true);
@@ -43,8 +44,8 @@ describe("summary integration", () => {
 
     it("should apply filters correctly", async () => {
       const result = await getSummary(database, {
-        application,
-        version,
+        applications: [application],
+        versions: [version],
         pageSize: 5,
       });
 
@@ -60,8 +61,8 @@ describe("summary integration", () => {
   describe("formatSummaryOutput", () => {
     it("should format summary from BugSplat", async () => {
       const summaries = await getSummary(database, {
-        application,
-        version,
+        applications: [application],
+        versions: [version],
         pageSize: 2,
       });
 
