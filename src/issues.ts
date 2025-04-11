@@ -21,13 +21,13 @@ export async function getIssues(
 
   if (options.application) {
     filterGroups.push(
-      QueryFilterGroup.fromColumnValues([options.application], "application")
+      QueryFilterGroup.fromColumnValues([options.application], "appName")
     );
   }
 
   if (options.version) {
     filterGroups.push(
-      QueryFilterGroup.fromColumnValues([options.version], "version")
+      QueryFilterGroup.fromColumnValues([options.version], "appVersion")
     );
   }
 
@@ -61,6 +61,9 @@ export function formatIssuesOutput(
       }
       if (row.appVersion) {
         text += `Version: ${row.appVersion}\n`;
+      }
+      if (row.userDescription) {
+        text += `Description: ${row.userDescription}\n`;
       }
       if (row.appDescription) {
         text += `Key: ${row.appDescription}\n`;

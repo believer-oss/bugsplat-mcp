@@ -77,3 +77,39 @@ npm run debug
 ```
 
 4. Open your browser to [http://127.0.0.1:6274](http://127.0.0.1:6274) to access the MCP Inspector interface.
+
+## Testing 🧪
+
+The project uses Jasmine for testing. Due to ESM compatibility issues with ts-node, tests are run from built JavaScript files rather than directly from TypeScript.
+
+### Running Tests
+
+```bash
+npm test
+```
+
+This will:
+1. Build the TypeScript files into JavaScript
+2. Run the Jasmine test suite
+
+### Debugging Tests
+
+You can debug tests using VS Code in two ways:
+
+1. Using the Test Explorer:
+   - Open the Testing sidebar in VS Code
+   - Click the debug icon next to any test to start debugging
+   - Note: You must rebuild (`npm run build:test`) if you make changes to test files
+
+2. Using Launch Configurations:
+   - Open the Run and Debug sidebar in VS Code
+   - Select "Debug Tests" from the dropdown
+   - Press F5 to start debugging
+   - The configuration will automatically build before running
+
+### Important Notes
+
+- If you modify any test or source files, you need to rebuild before running tests again
+- The build step is necessary because ts-node doesn't play well with ESM imports
+- Tests have a 30-second timeout to accommodate API calls
+- Environment variables from your `.env` file are automatically loaded

@@ -35,8 +35,8 @@ export function formatIssueOutput(
   if (row.appVersion) {
     text += `Version: ${row.appVersion}\n`;
   }
-  if (row.appDescription) {
-    text += `Description: ${row.appDescription}\n`;
+  if (row.userDescription) {
+    text += `Description: ${row.userDescription}\n`;
   }
   if (row.user) {
     text += `User: ${row.user}\n`;

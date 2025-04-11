@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "bin": {
     "bugsplat-mcp": "./build/index.mjs"
   },
@@ -12,20 +13,26 @@
     "predebug": "npm run build",
     "debug": "node scripts/debug.mjs",
     "prestart": "npm run build",
-    "start": "node build/index.mjs"
+    "start": "node build/index.mjs",
+    "build:test": "tsc -p tsconfig.spec.json && mkdir -p build/spec/support && cp spec/support/jasmine.json build/spec/support/",
+    "pretest": "npm run build:test",
+    "test": "node --experimental-vm-modules node_modules/jasmine/bin/jasmine.js --config=build/spec/support/jasmine.json"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "@bugsplat/js-api-client": "^11.0.0",
     "@modelcontextprotocol/sdk": "^1.9.0",
+    "@types/jasmine": "^5.1.7",
+    "jasmine": "^5.6.0",
+    "ts-node": "^10.9.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
-    "dotenv": "^16.4.7",
+    "bugsplat": "^8.0.1",
+    "dotenv": "^16.5.0",
     "typescript": "^5.8.3"
   },
   "files": [
