@@ -10,6 +10,7 @@ export async function getIssues(
   options: {
     application?: string;
     version?: string;
+    stackGroup?: string;
     startDate?: string;
     endDate?: string;
     pageSize?: number;
@@ -28,6 +29,12 @@ export async function getIssues(
   if (options.version) {
     filterGroups.push(
       QueryFilterGroup.fromColumnValues([options.version], "appVersion")
+    );
+  }
+
+  if (options.stackGroup) {
+    filterGroups.push(
+      QueryFilterGroup.fromColumnValues([options.stackGroup], "stackKey")
     );
   }
 

@@ -24,6 +24,7 @@ server.tool(
       .optional()
       .describe("Application name to filter by"),
     version: z.string().optional().describe("Version to filter by"),
+    stackGroup: z.string().optional().describe("Stack group to filter by"),
     startDate: z
       .string()
       .optional()
@@ -40,12 +41,13 @@ server.tool(
       .default(10)
       .describe("Number of results per page (1-100, defaults to 10)"),
   },
-  async ({ application, version, startDate, endDate, pageSize }) => {
+  async ({ application, version, stackGroup, startDate, endDate, pageSize }) => {
     try {
       checkCredentials();
       const rows = await getIssues(process.env.BUGSPLAT_DATABASE!, {
         application,
         version,
+        stackGroup,
         startDate,
         endDate,
         pageSize,

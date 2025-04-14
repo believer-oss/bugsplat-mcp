@@ -59,6 +59,32 @@ describe("issues integration", () => {
       expect(testCrash?.appName).toBe(application);
       expect(testCrash?.appVersion).toBe(version);
     });
+
+    it("should get issues with filters", async () => {
+      const result = await getIssues(database, {
+        pageSize: 5,
+        application,
+        version,
+      });
+      expect(result.length).toBeLessThanOrEqual(5);
+    });
+
+    it("should get issues with stackGroup filter", async () => {
+      const result = await getIssues(database, {
+        pageSize: 5,
+        stackGroup: "test-stack-group",
+      });
+      expect(result.length).toBeLessThanOrEqual(5);
+    });
+
+    it("should get issues with date filters", async () => {
+      const result = await getIssues(database, {
+        pageSize: 5,
+        startDate: "2024-01-01",
+        endDate: "2024-12-31",
+      });
+      expect(result.length).toBeLessThanOrEqual(5);
+    });
   });
 
   describe("formatIssuesOutput", () => {
