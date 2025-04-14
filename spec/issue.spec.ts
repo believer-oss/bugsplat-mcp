@@ -25,6 +25,9 @@ describe("issue integration", () => {
       expect(result).toBeDefined();
       expect(result.id).toBe(id);
       expect(result.crashTime).toBeDefined();
+      expect(result.thread.stackFrames[0].functionName).toContain(
+        "functionThree"
+      );
     });
 
     it("should throw an error for non-existent issue", async () => {
@@ -32,7 +35,7 @@ describe("issue integration", () => {
       await expectAsync(
         getIssue(database, nonExistentId)
       ).toBeRejectedWithError(
-        `Issue ${nonExistentId} not found in database ${database}`
+        `Invalid Crash Id`
       );
     });
   });
@@ -47,7 +50,7 @@ describe("issue integration", () => {
       expect(output).toContain(crash.crashTime);
       expect(output).toContain(`Application: ${crash.appName}`);
       expect(output).toContain(`Version: ${crash.appVersion}`);
-      expect(output).toContain(`Description: ${crash.userDescription}`);
+      expect(output).toContain(`Description: ${crash.description}`);
     });
   });
 });

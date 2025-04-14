@@ -1,64 +1,73 @@
-import {
-  CrashesApiClient,
-  CrashesApiRow,
-  QueryFilterGroup,
-} from "@bugsplat/js-api-client";
+import { CrashApiClient, CrashDetails } from "@bugsplat/js-api-client";
 import { createBugSplatClient } from "./bugsplat.js";
 
 export async function getIssue(
   database: string,
   id: number
-): Promise<CrashesApiRow> {
+): Promise<CrashDetails> {
   const bugsplat = await createBugSplatClient();
-  const crashesClient = new CrashesApiClient(bugsplat);
-  const response = await crashesClient.getCrashes({
-    database,
-    filterGroups: [QueryFilterGroup.fromColumnValues([id.toString()], "id")],
-    pageSize: 1,
-  });
+  const crashesClient = new CrashApiClient(bugsplat);
+  const response = await crashesClient.getCrashById(database, id);
 
-  if (response.rows.length === 0) {
+  if (!response) {
     throw new Error(`Issue ${id} not found in database ${database}`);
   }
 
-  return response.rows[0];
+  return response;
 }
 
 export function formatIssueOutput(
-  row: CrashesApiRow,
+  crash: CrashDetails,
   database: string
 ): string {
-  let text = `Crash #${row.id} in database ${database} on ${row.crashTime}\n`;
-  if (row.appName) {
-    text += `Application: ${row.appName}\n`;
+  let text = `Crash #${crash.id} in database ${database} on ${crash.crashTime}\n`;
+  if (crash.appName) {
+    text += `Application: ${crash.appName}\n`;
   }
-  if (row.appVersion) {
-    text += `Version: ${row.appVersion}\n`;
+  if (crash.appVersion) {
+    text += `Version: ${crash.appVersion}\n`;
   }
-  if (row.userDescription) {
-    text += `Description: ${row.userDescription}\n`;
+  if (crash.description) {
+    text += `Description: ${crash.description}\n`;
   }
-  if (row.user) {
-    text += `User: ${row.user}\n`;
+  if (crash.user) {
+    text += `User: ${crash.user}\n`;
   }
-  if (row.email) {
-    text += `Email: ${row.email}\n`;
+  if (crash.email) {
+    text += `Email: ${crash.email}\n`;
   }
-  if (row.exceptionCode) {
-    text += `Exception Code: ${row.exceptionCode}\n`;
+  if (crash.exceptionCode) {
+    text += `Exception Code: ${crash.exceptionCode}\n`;
   }
-  if (row.exceptionMessage) {
-    text += `Exception Message: ${row.exceptionMessage}\n`;
+  if (crash.exceptionMessage) {
+    text += `Exception Message: ${crash.exceptionMessage}\n`;
   }
-  if (row.ipAddress) {
-    text += `IP Address: ${row.ipAddress}\n`;
+  if (crash.ipAddress) {
+    text += `IP Address: ${crash.ipAddress}\n`;
   }
-  if (row.stackKey) {
-    text += `Stack Key: ${row.stackKey}\n`;
+  if (crash.stackKey) {
+    text += `Stack Key: ${crash.stackKey}\n`;
   }
-  if (row.stackKeyId) {
-    text += `Stack Key ID: ${row.stackKeyId}\n`;
+  if (crash.stackKeyId) {
+    text += `Stack Key ID: ${crash.stackKeyId}\n`;
   }
-
+  if (
+    crash.thread &&
+    crash.thread.stackFrames &&
+    Array.isArray(crash.thread.stackFrames)
+  ) {
+    text += `Stack Trace:\n${crash.thread.stackFrames
+      .map((frame) => {
+        let stackFrame = frame.functionName;
+        if (frame.lineNumber) {
+          stackFrame += `:${frame.lineNumber}`;
+        }
+        if (frame.fileName) {
+          stackFrame += ` (${frame.fileName})`;
+        }
+        return `${stackFrame}`;
+      })
+      .join("\n")}`;
+  }
   return text;
 }

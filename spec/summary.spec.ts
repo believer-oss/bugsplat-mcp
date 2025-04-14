@@ -12,9 +12,8 @@ const version = "1.0.0";
 const description = "Test crash";
 
 describe("summary integration", () => {
-  let crashId: number;
   beforeAll(async () => {
-    crashId = await postAndWaitForCrashToProcess(
+    await postAndWaitForCrashToProcess(
       database,
       application,
       version,

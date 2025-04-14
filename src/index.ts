@@ -72,8 +72,8 @@ server.tool(
   async ({ id }) => {
     try {
       checkCredentials();
-      const row = await getIssue(process.env.BUGSPLAT_DATABASE!, id);
-      const output = formatIssueOutput(row, process.env.BUGSPLAT_DATABASE!);
+      const crash = await getIssue(process.env.BUGSPLAT_DATABASE!, id);
+      const output = formatIssueOutput(crash, process.env.BUGSPLAT_DATABASE!);
       return createSuccessResponse(output);
     } catch (error) {
       return createErrorResponse(error);
