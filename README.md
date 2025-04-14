@@ -4,20 +4,20 @@ This is a prototype implementation of a Model Context Protocol (MCP) server for 
 
 ## Getting Started 👨‍🏫
 
-1. Install dependencies:
+1. Install `bugsplat-mcp` globally with npm:
 ```bash
-npm install
+npm i -g bugsplat-mcp
 ```
 
-2. Add a local MCP server to [Claude Desktop](https://claude.ai/download) via `Settings > Developer > Edit Config`. Add the path to `node` under `command` and the path to `bugsplat-mcp/build/index.mjs` under `args`. Finally add env values for `BUGSPLAT_DATABASE`, `BUGSPLAT_CLIENT_ID`, and `BUGSPLAT_CLIENT_SECRET`.
+2. Add a local MCP server to [Claude Desktop](https://claude.ai/download) via `Settings > Developer > Edit Config`. Add the path to `npx` under `command` and the path to `bugsplat-mcp` under `args`. Finally add env values for `BUGSPLAT_DATABASE`, `BUGSPLAT_CLIENT_ID`, and `BUGSPLAT_CLIENT_SECRET`.
 ```json
 {
   "mcpServers": {
     ...
     "bugsplat-mcp": {
-      "command": "/path/to/bin/node",
+      "command": "npx",
       "args": [
-        "/path/to/bugsplat-mcp/build/index.mjs"
+        "bugsplat-mcp"
       ],
       "env": {
         "BUGSPLAT_DATABASE": "fred",
@@ -39,6 +39,7 @@ The server provides the following tools for interacting with BugSplat:
 Get a list of BugSplat issues with optional filtering:
 - `application`: Filter by application name
 - `version`: Filter by version
+- `stackGroup`: Filter by stack frame the crash is grouped by
 - `startDate`: Filter by start date (ISO format)
 - `endDate`: Filter by end date (ISO format)
 - `pageSize`: Number of results per page (1-99, defaults to 50)

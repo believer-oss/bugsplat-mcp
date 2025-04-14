@@ -5,11 +5,11 @@
   "main": "index.js",
   "type": "module",
   "bin": {
-    "bugsplat-mcp": "./build/index.mjs"
+    "bugsplat-mcp": "./build/index.js"
   },
   "scripts": {
     "prebuild": "rm -rf build",
-    "build": "tsc && mv build/index.js build/index.mjs && chmod 755 build/index.mjs",
+    "build": "tsc && chmod +x build/index.js",
     "predebug": "npm run build",
     "debug": "node scripts/debug.mjs",
     "prestart": "npm run build",
