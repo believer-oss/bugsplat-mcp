@@ -16,7 +16,9 @@
     "start": "node build/index.mjs",
     "build:test": "tsc -p tsconfig.spec.json && mkdir -p build/spec/support && cp spec/support/jasmine.json build/spec/support/",
     "pretest": "npm run build:test",
-    "test": "node --experimental-vm-modules node_modules/jasmine/bin/jasmine.js --config=build/spec/support/jasmine.json"
+    "test": "node --experimental-vm-modules node_modules/jasmine/bin/jasmine.js --config=build/spec/support/jasmine.json",
+    "prerelease": "npm run build",
+    "release": "npm publish --access public"
   },
   "keywords": [
     "bugsplat",
