@@ -59,9 +59,13 @@ Get list of attachments for a specific BugSplat issue. The attachments tool list
 - `id`: Issue ID to retrieve
 
 ### get-attachment
-Get a specific attachment for a BugSplat issue. Returns the file content as a base64 blob.
+Get a specific attachment for a BugSplat issue. Returns the file content as a base64 blob. Supports pagination for large files to avoid exceeding token limits.
 - `crashId`: The ID of the crash report
 - `file`: The name of the attachment file to retrieve
+- `offset`: Starting byte position (optional, defaults to 0)
+- `limit`: Maximum number of bytes to read (optional, 1-1048576, defaults to 262144 bytes)
+
+**Pagination Support**: Large attachment files are automatically chunked to prevent token limit errors. The response includes pagination metadata showing current position, total file size, and the next offset to use for subsequent requests.
 
 ### create-defect
 Create a new defect in a connected defect tracking system.
@@ -78,7 +82,30 @@ Add a link between a BugSplat issue and an existing defect in a connected defect
 Remove the link between a BugSplat issue and a connected defect tracking system. The defect in the defect tracking system will not be deleted, but the link will be removed.
 - `stackKeyId`: The Stack Key ID you'd like to remove the defect from
 
-Each tool will automatically use the credentials provided in your `.env` file or the environment variables configured for the MCP server. 
+Each tool will automatically use the credentials provided in your `.env` file or the environment variables configured for the MCP server.
+
+## Pagination 📄
+
+Some tools support pagination to handle large datasets efficiently:
+
+### File Content Pagination (get-attachment)
+For large attachment files that might exceed token limits, the `get-attachment` tool automatically supports pagination:
+
+```
+Example usage:
+1. First request: get-attachment with crashId=123, file="large-log.txt"
+   - Returns first 262KB of file with pagination metadata
+2. Subsequent requests: get-attachment with crashId=123, file="large-log.txt", offset=262144
+   - Returns next chunk starting from byte 262144
+```
+
+The response includes helpful metadata:
+- Current byte range (e.g., "0-262144/1048576 bytes")
+- Whether more content is available
+- Next offset to use for subsequent requests
+
+### List Pagination (list-issues, get-key-crashes, get-summary)
+These tools support standard page-based pagination with `pageSize` parameters to limit the number of results returned in a single request. 
 
 ## Developing 👨‍💻
 
