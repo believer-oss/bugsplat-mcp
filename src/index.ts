@@ -195,12 +195,14 @@ server.tool(
 
 server.tool(
   "get-attachment",
-  "Get a specific attachment for a BugSplat issue. Returns the file content as a base64 blob.",
+  "Get a specific attachment for a BugSplat issue. Returns the file content as a base64 blob. Supports pagination for large files to avoid exceeding token limits.",
   {
     crashId: z.number().describe("The ID of the crash report"),
     file: z.string().describe("The name of the attachment file to retrieve"),
+    offset: z.number().min(0).optional().default(0).describe("Starting byte position (defaults to 0)"),
+    limit: z.number().min(1).max(1048576).optional().default(262144).describe("Maximum number of bytes to read (1-1048576, defaults to 262144 bytes)"),
   },
-  async ({ crashId, file }) => {
+  async ({ crashId, file, offset, limit }) => {
     try {
       checkCredentials();
 
@@ -212,13 +214,28 @@ server.tool(
         );
       }
 
-      const contents = await readFile(
-        join(getAttachmentDirPath(crashId), file)
-      );
-      const blob = contents.toString("base64");
+      const filePath = join(getAttachmentDirPath(crashId), file);
+      const contents = await readFile(filePath);
+      const totalSize = contents.length;
+
+      // Calculate the actual chunk to read
+      const startPos = Math.min(offset, totalSize);
+      const endPos = Math.min(offset + limit, totalSize);
+      const chunk = contents.subarray(startPos, endPos);
+
+      const blob = chunk.toString("base64");
       const mimeType = mime.getType(file) || "application/octet-stream";
 
-      return await createAttachmentResponse(blob, mimeType, file);
+      // Add pagination info to the response
+      const paginationInfo = {
+        offset: startPos,
+        limit: endPos - startPos,
+        totalSize,
+        hasMore: endPos < totalSize,
+        nextOffset: endPos < totalSize ? endPos : null
+      };
+
+      return await createAttachmentResponse(blob, mimeType, file, paginationInfo);
     } catch (error) {
       return createErrorResponse(error);
     }
@@ -332,8 +349,19 @@ function createSuccessResponse(text: string): McpResponse {
 async function createAttachmentResponse(
   blob: string,
   mimeType: string,
-  fileName: string
+  fileName: string,
+  paginationInfo?: {
+    offset: number;
+    limit: number;
+    totalSize: number;
+    hasMore: boolean;
+    nextOffset: number | null;
+  }
 ): Promise<McpResponse> {
+  const paginationHeader = paginationInfo
+    ? `File: ${fileName} (${paginationInfo.offset}-${paginationInfo.offset + paginationInfo.limit}/${paginationInfo.totalSize} bytes)${paginationInfo.hasMore ? ` - Use offset=${paginationInfo.nextOffset} for next chunk` : ' - Complete'}\n\n`
+    : '';
+
   if (mimeType.startsWith("image/")) {
     let imageBuffer = Buffer.from(blob, "base64");
     let resizedBlob = blob;
@@ -353,16 +381,23 @@ async function createAttachmentResponse(
       );
     }
 
-    return {
-      content: [
-        {
-          type: "image" as const,
-          data: resizedBlob,
-          mimeType,
-          fileName,
-        },
-      ],
-    };
+    const content: McpContent[] = [];
+
+    if (paginationInfo) {
+      content.push({
+        type: "text" as const,
+        text: paginationHeader,
+      });
+    }
+
+    content.push({
+      type: "image" as const,
+      data: resizedBlob,
+      mimeType,
+      fileName,
+    });
+
+    return { content };
   } else if (mimeType.startsWith("text/")) {
     const buffer = Buffer.from(blob, "base64");
 
@@ -375,7 +410,7 @@ async function createAttachmentResponse(
       content: [
         {
           type: "text" as const,
-          text: textContent,
+          text: paginationHeader + textContent,
         },
       ],
     };
